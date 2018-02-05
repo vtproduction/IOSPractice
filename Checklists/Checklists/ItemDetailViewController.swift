@@ -1,5 +1,5 @@
 //
-//  AddItemViewController.swift
+//  ItemDetailViewController.swift
 //  Checklists
 //
 //  Created by cityme on 2/1/18.
@@ -10,21 +10,27 @@ import Foundation
 import UIKit
 
 
-protocol AddItemViewControllerDelegate : class {
-    func addItemViewControllerDidCancel(_ controller: AddItemViewController)
-    func addItemViewController(_ controller: AddItemViewController, didFinishAdding item : ChecklistItem)
+protocol ItemDetailViewControllerDelegate : class {
+    func ItemDetailViewControllerDidCancel(_ controller: ItemDetailViewController)
+    func ItemDetailViewController(_ controller: ItemDetailViewController, didFinishAdding item : ChecklistItem)
+    func ItemDetailViewController(_ controller: ItemDetailViewController, didFinishEditing item : ChecklistItem)
 }
 
-class AddItemViewController: UITableViewController, UITextFieldDelegate {
+class ItemDetailViewController: UITableViewController, UITextFieldDelegate {
     
     
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var doneBarButton: UIBarButtonItem!
-    weak var delegate : AddItemViewControllerDelegate?
-    
+    weak var delegate : ItemDetailViewControllerDelegate?
+    var itemToEdit: ChecklistItem?
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        if let item = itemToEdit {
+            title = "Edit Item"
+            textField.text = item.text
+            doneBarButton.isEnabled = true
+        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -39,16 +45,22 @@ class AddItemViewController: UITableViewController, UITextFieldDelegate {
     }
     
     @IBAction func cancel() {
-        delegate?.addItemViewControllerDidCancel(self)
+        delegate?.ItemDetailViewControllerDidCancel(self)
     }
     @IBAction func done() { 
         print("Contents of the text field: \(textField.text!)")
-        let item = ChecklistItem()
-        item.checked = false
-        item.text = textField.text
         
-        //dismiss(animated: true, completion: nil)
-        delegate?.addItemViewController(self, didFinishAdding: item)
+        if let item = itemToEdit {
+            item.text = textField.text!
+            delegate?.ItemDetailViewController(self, didFinishEditing: item)
+        } else {
+            let item = ChecklistItem()
+            item.text = textField.text!
+            item.checked = false
+            delegate?.ItemDetailViewController(self, didFinishAdding: item)
+        }
+        
+        
     }
     
     
